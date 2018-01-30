@@ -1,12 +1,32 @@
 package com.snakegame.beans;
 
+import com.google.gson.annotations.Expose;
+
 public class Match {
+	@Expose
 	int matichId;
+	@Expose
 	Player player1;
+	@Expose
 	Player player2;
-	int messageFrom = 1;
+	@Expose
+	int messageFrom = 0;
+	@Expose
 	boolean matchFinished = false;
+	@Expose
 	Food food;
+	@Expose
+	boolean gameOverSent = false;
+	
+	
+	public boolean isGameOverSent() {
+		return gameOverSent;
+	}
+
+	public void setGameOverSent(boolean gameOverSent) {
+		this.gameOverSent = gameOverSent;
+	}
+
 	public Match(){
 		
 	}
@@ -53,6 +73,14 @@ public class Match {
 
 	public void setFood(Food food) {
 		this.food = food;
+	}
+
+	public void restart() {
+		this.getPlayer1().restart();
+		this.getPlayer2().restart();
+		this.setMatchFinished(false);
+		this.setGameOverSent(false);
+		
 	}
 
 }

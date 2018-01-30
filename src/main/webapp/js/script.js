@@ -142,11 +142,11 @@ function connect() {
 		ws.send(json);
 		console.log(msg);
 	}
-/*
+
 	$("#exit_game").click(function(){
 		ws.close();
 	});
-	*/
+	
 	$(document).keydown(function(e){
 		var Playerfrom;
 		if (thisPlayer == "player1") Playerfrom = "1";
@@ -156,10 +156,9 @@ function connect() {
 		var content = d;
 		var d;
 		var next_d = "";
-		//var changed_direction = false;
 		var key = e.which;
-		if (thisPlayer == "player1") d = message.player1.moves[0];
-		if (thisPlayer == "player2") d = message.player2.moves[0];
+		if (thisPlayer == "player1") d = message.player1.moves[message.player1.moves.length-1];
+		if (thisPlayer == "player2") d = message.player2.moves[message.player2.moves.length-1];
 		if(changed_direction){
 			if(key == "37") {
 				next_d = "left";
@@ -178,8 +177,8 @@ function connect() {
 				else resume_game();
 			}
 			var oldDir;
-			if (thisPlayer == "player1") oldDir = message.player1.moves[0];
-			if (thisPlayer == "player2") oldDir = message.player2.moves[0];
+			if (thisPlayer == "player1") oldDir = message.player1.moves[message.player1.moves.length-1];
+			if (thisPlayer == "player2") oldDir = message.player2.moves[message.player2.moves.length-1];
 			var msg = {
 					"from" : Playerfrom,
 					"to" : "server",
@@ -223,4 +222,5 @@ function connect() {
 }
 $("#playerName").click(function(){
 	connect();
+	$("#insert_data").css('visibility','hidden');
 });

@@ -29,10 +29,11 @@
 			<div id="snake-size" class="score"></div>
 		</div>
 		<div class="test">
+			<div id="insert_data">
 			Insert your name: <input type="text" id="PlayerOneName"
 				name="PlayerOneName">
 			<button id="playerName">Ready</button>
-
+			</div>
 			<div id="div1" class="test" class="divPlayer">
 				Player 1: <label id="lblPlayerOneName"> </label>
 			</div>

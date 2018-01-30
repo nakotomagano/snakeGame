@@ -8,9 +8,9 @@ public class Player {
 	private String name;
 	List<Coordinate>  coordinates = new ArrayList<Coordinate>(1);
 	boolean isReady;
-	String direction;
-	String previousDirection;
-	boolean hadPreviousDirection;
+//	String direction;
+//	String previousDirection;
+//	boolean hadPreviousDirection;
 	boolean rematch;
 	List<String> moves = new ArrayList<String>();		//????
 	
@@ -29,7 +29,7 @@ public class Player {
 	public void setRematch(boolean rematch) {
 		this.rematch = rematch;
 	}
-
+/*
 	public boolean getHadPreviousDirection() {
 		return hadPreviousDirection;
 	}
@@ -48,7 +48,7 @@ public class Player {
 
 	String nextDirection = "";
 	boolean changedPlayer;
-	public Player(){
+*/	public Player(){
 		
 	}
 	
@@ -57,11 +57,11 @@ public class Player {
 		this.name = name;
 		createBody(5);
 		this.setCoordinates(coordinates);
-		this.direction = "right";
-		this.previousDirection = "right";
+	//	this.direction = "right";
+	//	this.previousDirection = "right";
 		this.isReady = false;
-		this.changedPlayer = false;
-		this.hadPreviousDirection = false;
+	//	this.changedPlayer = false;
+	//	this.hadPreviousDirection = false;
 		this.rematch = false;
 		this.moves.clear();
 		this.moves.add("right"); //?????
@@ -70,11 +70,11 @@ public class Player {
 	public void restart(){
 		createBody(5);
 		this.setCoordinates(coordinates);
-		this.direction = "right";
-		this.previousDirection = "right";
+	//	this.direction = "right";
+	//	this.previousDirection = "right";
 		this.isReady = true;
-		this.changedPlayer = false;
-		this.hadPreviousDirection = false;
+	//	this.changedPlayer = false;
+	//	this.hadPreviousDirection = false;
 		this.rematch = false;
 		this.moves.clear();
 		this.moves.add("right");
@@ -119,7 +119,7 @@ public class Player {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+/*
 	public String getDirection() {
 		return direction;
 	}
@@ -144,5 +144,5 @@ public class Player {
 	public void setChangedPlayer(boolean changedPlayer) {
 		this.changedPlayer = changedPlayer;
 	}
-
+*/
 }
