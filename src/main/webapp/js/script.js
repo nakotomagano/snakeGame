@@ -5,16 +5,18 @@ var message;
 var changed_direction;
 function connect() {
 	var username = document.getElementById("PlayerOneName").value;
-
+	var count = 3;
 	var host = document.location.host;
 	var pathname = document.location.pathname;
 	var thisPlayer;
+	var d = "right"; //???
 	ws = new WebSocket("ws://" +host  + pathname + "chat/" + username);
 
 	//kad primis poruku sa severa, radi sledece:	
 	ws.onmessage = function(event) {
 		message = JSON.parse(event.data);
 		var gOver = message.matchFinished;
+		var matchStatus = message.status;
 		var coordinates1 = message.player1.coordinates;
 		var isPlayer1Ready = message.player1.isReady;
 		var isPlayer2Ready = message.player2.isReady;
@@ -25,6 +27,8 @@ function connect() {
 			else thisPlayer = "player2";
 		}
 		else player1 = true;
+		if (thisPlayer == "player1") d = message.player1.moves[message.player1.moves.length-1];
+		if (thisPlayer == "player2") d = message.player2.moves[message.player2.moves.length-1];
 		msgsRecieved++;
 		changed_direction = false;
 		//	$(document).ready(function(){
@@ -33,7 +37,7 @@ function connect() {
 		var w = $('#canvas').width();
 		var h = $('#canvas').height();
 		var cw = 15;      //cell width
-		var d = "right";  //direction
+//		var d = "right";  //direction
 		var score;
 		var color = "green";
 		var speed = 500;
@@ -62,6 +66,7 @@ function connect() {
 		//setTimeout(paint(),450);
 
 		if(gOver) game_over();
+		if(matchStatus == "starting") game_starting();
 		paint();
 		function paint(){
 			var recX;
@@ -115,6 +120,33 @@ function connect() {
 			//$('#canvas').css('visibility','hidden');
 		}
 
+		function game_starting(){
+			$('#starting').fadeIn(100);
+			countdown();
+		}
+		
+		
+		///////////////////////////////
+		
+		function countdown(){
+		    displayTime();
+		    if (count > 0) {
+		      setTimeout(countdown, 1000);
+		      count--;
+		    } else {
+				$('#starting').fadeOut(100);
+				count = 3;
+		    }
+		}
+
+		function displayTime() { 
+		  
+		 // var sec = count;
+		    document.getElementById('starting').innerHTML = 'Starting in ' + count;
+		}
+		
+		///////////////////////////////
+		
 		
 		//	});
 	};
@@ -154,11 +186,11 @@ function connect() {
 		var to = "server";
 		var from = Playerfrom;
 		var content = d;
-		var d;
+//		var d;
 		var next_d = "";
 		var key = e.which;
-		if (thisPlayer == "player1") d = message.player1.moves[message.player1.moves.length-1];
-		if (thisPlayer == "player2") d = message.player2.moves[message.player2.moves.length-1];
+//		if (thisPlayer == "player1") d = message.player1.moves[message.player1.moves.length-1];
+//		if (thisPlayer == "player2") d = message.player2.moves[message.player2.moves.length-1];
 		if(changed_direction){
 			if(key == "37") {
 				next_d = "left";
@@ -176,13 +208,13 @@ function connect() {
 				if(paused == false) pause_game();
 				else resume_game();
 			}
-			var oldDir;
+/*			var oldDir;
 			if (thisPlayer == "player1") oldDir = message.player1.moves[message.player1.moves.length-1];
 			if (thisPlayer == "player2") oldDir = message.player2.moves[message.player2.moves.length-1];
-			var msg = {
+*/			var msg = {
 					"from" : Playerfrom,
 					"to" : "server",
-					"content" : oldDir,
+					"content" : d, //oldDir
 					"nextDirection" : next_d
 			}
 			var json = JSON.stringify(msg);

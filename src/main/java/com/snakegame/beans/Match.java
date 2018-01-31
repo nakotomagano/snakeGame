@@ -17,15 +17,8 @@ public class Match {
 	Food food;
 	@Expose
 	boolean gameOverSent = false;
-	
-	
-	public boolean isGameOverSent() {
-		return gameOverSent;
-	}
-
-	public void setGameOverSent(boolean gameOverSent) {
-		this.gameOverSent = gameOverSent;
-	}
+	@Expose
+	String status = "";
 
 	public Match(){
 		
@@ -75,12 +68,29 @@ public class Match {
 		this.food = food;
 	}
 
+	
+	
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public boolean isGameOverSent() {
+		return gameOverSent;
+	}
+
+	public void setGameOverSent(boolean gameOverSent) {
+		this.gameOverSent = gameOverSent;
+	}
 	public void restart() {
 		this.getPlayer1().restart();
 		this.getPlayer2().restart();
 		this.setMatchFinished(false);
 		this.setGameOverSent(false);
-		
+		this.setStatus("starting");
 	}
 
 }

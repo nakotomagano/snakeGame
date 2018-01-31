@@ -38,10 +38,9 @@ public class ChatEndpoint {
 	private static Match match = new Match();
 	private static ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(); //newScheduledThreadPool(0);	//newSingleThreadScheduledExecutor()
 	//ScheduledExecutorService timer = Executors.newScheduledThreadPool(5);
-	//FutureTask<Match>[] future = new FutureTask[1];
-	private final int MIN_SNAKE_SIZE = 5;
+	private final int MIN_SNAKE_SIZE = 4;
 	private final int GAME_SPEED = 300; //in milliseconds
-	private final int GAME_DELAY = 300; //in milliseconds
+	private final int GAME_DELAY = 3000; //in milliseconds
 	private final Coordinate START_FOOD_POSITION = new Coordinate(-1,-1);
 
 	@OnOpen
@@ -75,17 +74,17 @@ public class ChatEndpoint {
 		match.setFood(f);
 		//	gameOverSent = false;
 		match.setMatchFinished(false);
+		match.setStatus("starting");
 		try {
 			broadcast(match);
 		} catch (IOException | EncodeException e1) {
 			e1.printStackTrace();
 		}
-
+		match.setStatus("started");
 		timer.scheduleAtFixedRate(
 				() -> {
 					if(!match.isGameOverSent()){
 						try {
-							//	System.out.println("game is going...");
 							calculateNextPositions();
 						} catch (IOException | EncodeException e) {
 							e.printStackTrace();
@@ -133,9 +132,9 @@ public class ChatEndpoint {
 		 */
 		checkForCombat(newHead1, newHead2);
 		//When someone hits the wall, remove one tile and respawn
-		if(playerHitTheWall(newHead1))
+		if(playerHitTheWall(newHead1) || playerHitHimself(player1))
 			player1.createBody(player1.getCoordinates().size()-1);
-		if(playerHitTheWall(newHead2))
+		if(playerHitTheWall(newHead2) || playerHitHimself(player2))
 			player2.createBody(player2.getCoordinates().size()-1);
 		if(player1.getCoordinates().size() < MIN_SNAKE_SIZE || player2.getCoordinates().size() < MIN_SNAKE_SIZE)
 			match.setMatchFinished(true);
@@ -149,8 +148,8 @@ public class ChatEndpoint {
 	private void movePlayer(Player player, Coordinate newHead, Coordinate head, Coordinate tail) {
 		boolean playerAteFood = false;
 		//	String playerDirection = player.getDirection();
-		if(player.getMoves().isEmpty())
-			System.out.println("GET MOVES IS EMPTY!!!");
+		//if(player.getMoves().isEmpty())
+		//	System.out.println("GET MOVES IS EMPTY!!!");
 		String playerDirection = player.getMoves().get(0);
 		if("right".equals(playerDirection)) {
 			newHead.setX(head.getX() + 1);
@@ -176,8 +175,8 @@ public class ChatEndpoint {
 		if(player.getMoves().size() > 1)
 			player.getMoves().remove(0);
 
-		String zaStampu = Integer.toString(player.getId()) + ": " + player.getMoves();
-		System.out.println(zaStampu);
+		//String zaStampu = Integer.toString(player.getId()) + ": " + player.getMoves();
+		//System.out.println(zaStampu);
 	}
 	private boolean isFoodEaten(Coordinate head) {
 		Coordinate fCoord = match.getFood().getCoord();
@@ -191,6 +190,14 @@ public class ChatEndpoint {
 	private boolean playerHitTheWall(Coordinate head) {
 		if(head.getX()<0 || head.getX() > 40 || head.getY()<0 || head.getY() > 26)
 			return true;
+		return false;
+	}
+
+	private boolean playerHitHimself(Player player) {
+		Coordinate head = player.getCoordinates().get(player.getCoordinates().size()-1);
+		for(int i=0; i<player.getCoordinates().size()-1; i++)
+			if(head.getX() == player.getCoordinates().get(i).getX() && head.getY() == player.getCoordinates().get(i).getY())
+				return true;
 		return false;
 	}
 
@@ -237,6 +244,24 @@ public class ChatEndpoint {
 			//REMATCH!
 			System.out.println("Rematch starting!");
 			match.restart();
+			try {
+				broadcast(match);
+			} catch (IOException | EncodeException e1) {
+				e1.printStackTrace();
+			}
+			//TODO: This is terrible, must find better way of delaying rematch
+			match.setMatchFinished(true);
+			match.setGameOverSent(true);
+			try {
+				TimeUnit.SECONDS.sleep(3);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			match.setMatchFinished(false);
+			match.setGameOverSent(false);
+			//TODO: Terribleness ends here. o.O
+			match.setStatus("started");
 		}
 		else if(!match.isMatchFinished()){
 			match.setMessageFrom(Integer.parseInt(msg.getFrom()));
@@ -251,7 +276,7 @@ public class ChatEndpoint {
 	private void checkPlayerDirection(Player player, Message msg) {
 		String direction = msg.getContent();
 		String nextDirection = msg.getNextDirection();
-		System.out.println("checking player direction");
+	//	System.out.println("checking player direction");
 		if(!direction.isEmpty()){
 
 			if(player.getMoves().size() <= 2) {

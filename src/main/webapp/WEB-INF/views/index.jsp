@@ -23,6 +23,8 @@
 		<canvas id="canvas" width="600" height="400">
       Sorry, your browser does not support canvas element
     </canvas>
+    <div id="starting" class="hwindow">
+    </div>
 		<div id="stats">
 			<div id="current-score" class="score"></div>
 			<div id="high-score" class="score"></div>
@@ -30,7 +32,7 @@
 		</div>
 		<div class="test">
 			<div id="insert_data">
-			Insert your name: <input type="text" id="PlayerOneName"
+			Enter your name: <input type="text" id="PlayerOneName"
 				name="PlayerOneName">
 			<button id="playerName">Ready</button>
 			</div>
