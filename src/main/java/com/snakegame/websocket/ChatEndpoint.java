@@ -28,7 +28,7 @@ import com.snakegame.beans.Message;
 import com.snakegame.beans.Player;
 
 
-@ServerEndpoint(value = "/chat/{username}", decoders = { MatchDecoder.class, MessageDecoder.class}, encoders = {MatchEncoder.class, MessageEncoder.class})
+@ServerEndpoint(value = "/user/{username}", decoders = { MatchDecoder.class, MessageDecoder.class}, encoders = {MatchEncoder.class, MessageEncoder.class})
 public class ChatEndpoint {
 
 	private Session session;
@@ -57,6 +57,8 @@ public class ChatEndpoint {
 			match.getPlayer1().setReady(true);
 			Player player2 = new Player(2,"waiting");
 			match.setPlayer2(player2);
+			Food f = new Food(START_FOOD_POSITION, "starting");
+			match.setFood(f);
 		} else if (chatEndpoints.size() == 2){
 			Player player2 = new Player(chatEndpoints.size(),username);
 			match.setPlayer2(player2);
@@ -70,8 +72,6 @@ public class ChatEndpoint {
 
 	private void startTheMatch() {
 		//TODO: change this, for now there has to be food, so at beginning it's set outside the canvas 
-		Food f = new Food(START_FOOD_POSITION, "starting");
-		match.setFood(f);
 		//	gameOverSent = false;
 		match.setMatchFinished(false);
 		match.setStatus("starting");
@@ -132,24 +132,36 @@ public class ChatEndpoint {
 		 */
 		checkForCombat(newHead1, newHead2);
 		//When someone hits the wall, remove one tile and respawn
-		if(playerHitTheWall(newHead1) || playerHitHimself(player1))
-			player1.createBody(player1.getCoordinates().size()-1);
-		if(playerHitTheWall(newHead2) || playerHitHimself(player2))
-			player2.createBody(player2.getCoordinates().size()-1);
-		if(player1.getCoordinates().size() < MIN_SNAKE_SIZE || player2.getCoordinates().size() < MIN_SNAKE_SIZE)
+		if(playerHitTheWall(newHead1) || playerHitHimself(player1)){
+			respawn(player1);
+		}
+		if(playerHitTheWall(newHead2) || playerHitHimself(player2)){
+			respawn(player2);
+		}
+		if(player1.getCoordinates().size() < MIN_SNAKE_SIZE){
 			match.setMatchFinished(true);
+			match.setWinner(2);
+		}
+		if(player2.getCoordinates().size() < MIN_SNAKE_SIZE){
+			match.setMatchFinished(true);
+			match.setWinner(1);
+			//TODO: What if it's a tie?
+		}
 		if(!match.isGameOverSent())
 			broadcast(match);
 		if(match.isMatchFinished()){
 			match.setGameOverSent(true);
 		}
 	}
+	private void respawn(Player player) {
+		player.createBody(player.getCoordinates().size()-1);
+		player.getMoves().clear();
+		player.getMoves().add("right");
+	}
+
 	//Part of calculateNextPositions()
 	private void movePlayer(Player player, Coordinate newHead, Coordinate head, Coordinate tail) {
 		boolean playerAteFood = false;
-		//	String playerDirection = player.getDirection();
-		//if(player.getMoves().isEmpty())
-		//	System.out.println("GET MOVES IS EMPTY!!!");
 		String playerDirection = player.getMoves().get(0);
 		if("right".equals(playerDirection)) {
 			newHead.setX(head.getX() + 1);

@@ -19,6 +19,7 @@ public class Match {
 	boolean gameOverSent = false;
 	@Expose
 	String status = "";
+	@Expose int winner = 0;
 
 	public Match(){
 		
@@ -85,12 +86,22 @@ public class Match {
 	public void setGameOverSent(boolean gameOverSent) {
 		this.gameOverSent = gameOverSent;
 	}
+
+	public int getWinner() {
+		return winner;
+	}
+
+	public void setWinner(int winner) {
+		this.winner = winner;
+	}
+	
 	public void restart() {
 		this.getPlayer1().restart();
 		this.getPlayer2().restart();
 		this.setMatchFinished(false);
 		this.setGameOverSent(false);
 		this.setStatus("starting");
+		this.winner = 0;
 	}
 
 }

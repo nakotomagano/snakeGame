@@ -10,12 +10,13 @@ function connect() {
 	var pathname = document.location.pathname;
 	var thisPlayer;
 	var d = "right"; //???
-	ws = new WebSocket("ws://" +host  + pathname + "chat/" + username);
+	ws = new WebSocket("ws://" +host  + pathname + "user/" + username);
 
 	//kad primis poruku sa severa, radi sledece:	
 	ws.onmessage = function(event) {
 		message = JSON.parse(event.data);
 		var gOver = message.matchFinished;
+		var winner = message.winner;
 		var matchStatus = message.status;
 		var coordinates1 = message.player1.coordinates;
 		var isPlayer1Ready = message.player1.isReady;
@@ -31,20 +32,16 @@ function connect() {
 		if (thisPlayer == "player2") d = message.player2.moves[message.player2.moves.length-1];
 		msgsRecieved++;
 		changed_direction = false;
-		//	$(document).ready(function(){
 		var canvas = $('#canvas')[0];
 		var ctx = canvas.getContext("2d");
 		var w = $('#canvas').width();
 		var h = $('#canvas').height();
 		var cw = 15;      //cell width
-//		var d = "right";  //direction
 		var score;
 		var color = "green";
 		var speed = 500;
 		var paused = false;
-		//Snake array
 		var snake_arr;
-		//var next_d = undefined;
 
 		var player1name = document.getElementById("lblPlayerOneName");
 		var player2name = document.getElementById("lblPlayerTwoName");
@@ -112,21 +109,19 @@ function connect() {
 			$('#canvas').css('visibility','visible');
 		}
 		function game_over() {
-			//  window.clearTimeout(game_loop);
-			//  paused = true;
-			$('#over').fadeIn(300);
-			//THIS SHOULD DO ON PLAY AGAIN : NO ~ ws.close();
-			//  clearInterval(game_loop);
-			//$('#canvas').css('visibility','hidden');
+			if(winner == 1)
+				document.getElementById('over').innerHTML = '<h1>Game Over</h1>Winner is ' + message.player1.name + '!';
+			if(winner == 2)
+				document.getElementById('over').innerHTML = '<h1>Game Over</h1>Winner is ' + message.player2.name + '!';
+			
+			$('#game_over').fadeIn(300);
+		//	$('#play_again').fadeIn(300);
 		}
 
 		function game_starting(){
 			$('#starting').fadeIn(100);
 			countdown();
 		}
-		
-		
-		///////////////////////////////
 		
 		function countdown(){
 		    displayTime();
@@ -140,15 +135,9 @@ function connect() {
 		}
 
 		function displayTime() { 
-		  
-		 // var sec = count;
-		    document.getElementById('starting').innerHTML = 'Starting in ' + count;
+		    document.getElementById('starting').innerHTML = '<h2>Starting in ' + count + '</h2>';
 		}
 		
-		///////////////////////////////
-		
-		
-		//	});
 	};
 	ws.onclose = function(){
 		ws.close();
@@ -158,7 +147,8 @@ function connect() {
 	});
 	
 	function rematch() {
-		$('#over').fadeOut(300);
+		$('#game_over').fadeOut(300);
+	//	$('#play_again').fadeOut(300);
 		var Playerfrom;
 		if (thisPlayer == "player1") Playerfrom = "1";
 		else if (thisPlayer == "player2") Playerfrom = "2";

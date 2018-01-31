@@ -14,17 +14,18 @@
 			<br />
 			<h4>Press space to continue</h4>
 		</div>
-		<div id="over" class="hwindow">
-			<h1>Game Over</h1>
-			<h2>Play again?</h2>
-			<button id="rematch">Yes</button>
-			<button id="exit_game">No</button>
+		<div id="game_over">
+			<div id="over"class="over"></div>
+			<div id="play_again" class="over">
+				<h2>Play again?</h2>
+				<button id="rematch">Yes</button>
+				<button id="exit_game">No</button>
+			</div>
 		</div>
 		<canvas id="canvas" width="600" height="400">
       Sorry, your browser does not support canvas element
     </canvas>
-    <div id="starting" class="hwindow">
-    </div>
+		<div id="starting" class="hwindow"></div>
 		<div id="stats">
 			<div id="current-score" class="score"></div>
 			<div id="high-score" class="score"></div>
@@ -32,9 +33,9 @@
 		</div>
 		<div class="test">
 			<div id="insert_data">
-			Enter your name: <input type="text" id="PlayerOneName"
-				name="PlayerOneName">
-			<button id="playerName">Ready</button>
+				Enter your name: <input type="text" id="PlayerOneName"
+					name="PlayerOneName">
+				<button id="playerName">Ready</button>
 			</div>
 			<div id="div1" class="test" class="divPlayer">
 				Player 1: <label id="lblPlayerOneName"> </label>
