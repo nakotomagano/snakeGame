@@ -25,11 +25,12 @@
 		<canvas id="canvas" width="600" height="400">
       Sorry, your browser does not support canvas element
     </canvas>
-		<div id="starting" class="hwindow"></div>
+		<div  id="start">
+		
+		</div>
 		<div id="stats">
-			<div id="current-score" class="score"></div>
-			<div id="high-score" class="score"></div>
-			<div id="snake-size" class="score"></div>
+			<div id="player1-score" class="score" style="float:left"></div>
+			<div id="player2-score" class="score" style="float:right"></div>
 		</div>
 		<div class="test">
 			<div id="insert_data">

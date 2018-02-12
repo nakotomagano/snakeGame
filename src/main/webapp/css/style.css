@@ -33,12 +33,15 @@ button {
 	font-weight: bold;
 	color: #ffffff;
 	margin-bottom: 5px;
+	margin-top: 5px;
 	overflow: auto;
 }
 #starting {
-	
-	top: 135px;
-	left: 175px;
+	height:200px;
+	line-height:200px;
+	width:350px;
+	top: 100px;
+	left: 130px;
 }
 #game_over {
 	display: none;
@@ -63,23 +66,23 @@ button {
 
 .test {
 	width: 590px;
-	background: #333333;
+	background: #e68a00;
 	padding: 5px;
 	font-size: 20px;
 	font-weight: bold;
-	color: #ffffff;
+	color: #000000;
 	margin-bottom: 5px;
-	overflow: auto;
+	overflow: hidden;
 }
 
 .score {
-	width: 25%;
+	width: 49%;
 	height: 50px;
 	padding-top: 20px;
 	float: left;
-	margin-right: 5px;
 	overflow: auto;
-	background: #000000;
+	background: #e68a00;
+	color: #000000;
 	text-al
 }
 
@@ -98,6 +101,17 @@ button {
 	left: 110px;
 }
 
+.countdown {
+	color: rgba(145, 43, 60,1);
+	text-align: center;
+	position: absolute;
+	top: 100px;
+	left: 110px;
+    animation-name: example2;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
 
 #overlay {
 	top: 170px;
@@ -113,4 +127,14 @@ button {
 
 #overlay a:hover {
 	background: #333333;
+}
+
+@keyframes example {
+    0%   {top:30px;}
+    50%  {top:0px;}
+    100% {top:30px;}
+}
+@keyframes example2 {
+    0%		{ font-size:60px;	}
+    100%	{ font-size:90px;}
 }

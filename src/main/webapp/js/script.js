@@ -10,6 +10,8 @@ function connect() {
 	var pathname = document.location.pathname;
 	var thisPlayer;
 	var d = "right"; //???
+	var p1wins = 0;
+	var p2wins = 0;
 	ws = new WebSocket("ws://" +host  + pathname + "user/" + username);
 
 	//kad primis poruku sa severa, radi sledece:	
@@ -47,6 +49,9 @@ function connect() {
 		var player2name = document.getElementById("lblPlayerTwoName");
 		player1name.innerHTML = message.player1.name;
 		player2name.innerHTML = message.player2.name;
+
+		document.getElementById('player1-score').innerHTML = '' + p1wins;
+		document.getElementById('player2-score').innerHTML = '' + p2wins;
 		//var d = new Date();
 		//var n = d.getTime();
 		//console.log(n);
@@ -109,11 +114,16 @@ function connect() {
 			$('#canvas').css('visibility','visible');
 		}
 		function game_over() {
-			if(winner == 1)
+			if(winner == 1){
 				document.getElementById('over').innerHTML = '<h1>Game Over</h1>Winner is ' + message.player1.name + '!';
-			if(winner == 2)
+				p1wins++;
+				document.getElementById('player1-score').innerHTML = '' + p1wins;
+			}
+			if(winner == 2){
 				document.getElementById('over').innerHTML = '<h1>Game Over</h1>Winner is ' + message.player2.name + '!';
-			
+				p2wins++;
+				document.getElementById('player2-score').innerHTML = '' + p2wins;			
+			}
 			$('#game_over').fadeIn(300);
 		//	$('#play_again').fadeIn(300);
 		}
@@ -135,7 +145,10 @@ function connect() {
 		}
 
 		function displayTime() { 
-		    document.getElementById('starting').innerHTML = '<h2>Starting in ' + count + '</h2>';
+			if (count > 0)
+				document.getElementById('start').innerHTML = '<span class="countdown" id="starting">' + count + '</span>'; //Starting in
+			else
+				document.getElementById('start').innerHTML = '<span class="countdown" id="starting">' + "GO!" + '</span>';
 		}
 		
 	};
