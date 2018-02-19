@@ -76,14 +76,15 @@ button {
 }
 
 .score {
-	width: 49%;
+	width: 33%;
 	height: 50px;
-	padding-top: 20px;
+	padding-top: 15px;
+	margin-left: 1px;
 	float: left;
 	overflow: auto;
 	background: #e68a00;
 	color: #000000;
-	text-al
+	text-align: -webkit-center;
 }
 
 #reset_score {

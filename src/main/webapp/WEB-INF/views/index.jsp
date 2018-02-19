@@ -29,8 +29,9 @@
 		
 		</div>
 		<div id="stats">
-			<div id="player1-score" class="score" style="float:left"></div>
-			<div id="player2-score" class="score" style="float:right"></div>
+			<div id="player1-score" class="score"></div>
+			<div id="draws-score" class="score"></div>
+			<div id="player2-score" class="score"></div>
 		</div>
 		<div class="test">
 			<div id="insert_data">

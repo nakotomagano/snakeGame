@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import javax.websocket.EncodeException;
@@ -33,6 +34,8 @@ public class ChatEndpoint {
 
 	private Session session;
 	private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
+	private static final int FIELD_WIDTH = 40;
+	private static final int FIELD_HEIGHT = 26;
 	private static HashMap<String, String> users = new HashMap<>();
 	private static Map<String, Session> sessions = new HashMap<String, Session>();
 	private static Match match = new Match();
@@ -95,7 +98,9 @@ public class ChatEndpoint {
 		timer.scheduleAtFixedRate(
 				() -> {
 					if(!match.isGameOverSent()){
-						Food food = new Food(new Coordinate(10,12), "addBodySize");
+						int randomWidth = ThreadLocalRandom.current().nextInt(0, FIELD_WIDTH + 1);
+						int randomHeight = ThreadLocalRandom.current().nextInt(0, FIELD_HEIGHT + 1);
+						Food food = new Food(new Coordinate(randomWidth,randomHeight), "addBodySize");
 						match.setFood(food);
 					}
 				},10,15,TimeUnit.SECONDS);
@@ -139,13 +144,16 @@ public class ChatEndpoint {
 			respawn(player2);
 		}
 		if(player1.getCoordinates().size() < MIN_SNAKE_SIZE){
+			if(player2.getCoordinates().size() < MIN_SNAKE_SIZE){
+				match.setMatchFinished(true);
+				match.setWinner(3);				//no winner - draw!
+			} else {
+				match.setMatchFinished(true);	//winner is player2!
+				match.setWinner(2);
+			}
+		} else if(player2.getCoordinates().size() < MIN_SNAKE_SIZE){
 			match.setMatchFinished(true);
-			match.setWinner(2);
-		}
-		if(player2.getCoordinates().size() < MIN_SNAKE_SIZE){
-			match.setMatchFinished(true);
-			match.setWinner(1);
-			//TODO: What if it's a tie?
+			match.setWinner(1);					//winner is player1!
 		}
 		if(!match.isGameOverSent())
 			broadcast(match);
@@ -200,7 +208,7 @@ public class ChatEndpoint {
 	}
 
 	private boolean playerHitTheWall(Coordinate head) {
-		if(head.getX()<0 || head.getX() > 40 || head.getY()<0 || head.getY() > 26)
+		if(head.getX()<0 || head.getX() > FIELD_WIDTH || head.getY()<0 || head.getY() > FIELD_HEIGHT)
 			return true;
 		return false;
 	}
@@ -214,9 +222,8 @@ public class ChatEndpoint {
 	}
 
 	private boolean someoneHitTheWall(Coordinate newHead1, Coordinate newHead2) {
-		//TODO: move 40 to constants.
-		if(newHead1.getX()<0 || newHead1.getX() > 40 || newHead2.getX()<0 || newHead2.getX() > 40 
-				|| newHead1.getY()<0 || newHead1.getY() > 26 || newHead2.getY()<0 || newHead2.getY() > 26 )
+		if(newHead1.getX()<0 || newHead1.getX() > FIELD_WIDTH || newHead2.getX()<0 || newHead2.getX() > FIELD_WIDTH 
+				|| newHead1.getY()<0 || newHead1.getY() > FIELD_HEIGHT || newHead2.getY()<0 || newHead2.getY() > FIELD_HEIGHT )
 			return true;
 		return false;
 	}
@@ -288,7 +295,7 @@ public class ChatEndpoint {
 	private void checkPlayerDirection(Player player, Message msg) {
 		String direction = msg.getContent();
 		String nextDirection = msg.getNextDirection();
-	//	System.out.println("checking player direction");
+		//	System.out.println("checking player direction");
 		if(!direction.isEmpty()){
 
 			if(player.getMoves().size() <= 2) {
