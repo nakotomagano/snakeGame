@@ -2,18 +2,23 @@ package com.snakegame.beans;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Player {
+	private static final Coordinate POS1 = new Coordinate(5,4);
+	private static final Coordinate POS2 = new Coordinate(34,5);
+	private static final Coordinate POS3 = new Coordinate(33,21);
+	private static final Coordinate POS4 = new Coordinate(6,22);
+
 	private int id;
 	private String name;
+	private int startingPosition;
 	List<Coordinate>  coordinates = new ArrayList<Coordinate>(1);
 	boolean isReady;
-//	String direction;
-//	String previousDirection;
-//	boolean hadPreviousDirection;
+
 	boolean rematch;
 	List<String> moves = new ArrayList<String>();		//????
-	
+
 	public List<String> getMoves() {
 		return moves;
 	}
@@ -29,72 +34,52 @@ public class Player {
 	public void setRematch(boolean rematch) {
 		this.rematch = rematch;
 	}
-/*
-	public boolean getHadPreviousDirection() {
-		return hadPreviousDirection;
+
+	public Player(){
+
 	}
 
-	public void setHadPreviousDirection(boolean hadPreviousDirection) {
-		this.hadPreviousDirection = hadPreviousDirection;
-	}
-
-	public String getPreviousDirection() {
-		return previousDirection;
-	}
-
-	public void setPreviousDirection(String previousDirection) {
-		this.previousDirection = previousDirection;
-	}
-
-	String nextDirection = "";
-	boolean changedPlayer;
-*/	public Player(){
-		
-	}
-	
-	public Player(int id, String name){
+	public Player(int id, String name, int startingPosition){
 		this.setId(id);
 		this.name = name;
+		this.startingPosition = startingPosition;
 		createBody(5);
 		this.setCoordinates(coordinates);
-	//	this.direction = "right";
-	//	this.previousDirection = "right";
 		this.isReady = false;
-	//	this.changedPlayer = false;
-	//	this.hadPreviousDirection = false;
 		this.rematch = false;
-		this.moves.clear();
-		this.moves.add("right"); //?????
 	}
-	
+
 	public void restart(){
 		createBody(5);
 		this.setCoordinates(coordinates);
-	//	this.direction = "right";
-	//	this.previousDirection = "right";
 		this.isReady = true;
-	//	this.changedPlayer = false;
-	//	this.hadPreviousDirection = false;
 		this.rematch = false;
-		this.moves.clear();
-		this.moves.add("right");
 	}
 
 	public void createBody(int length) {
-		coordinates.clear();
-		//set starting coordinates
+		this.coordinates.clear();
+		this.moves.clear();
+		addTilesAndDirection(length);
+	}
+	private void addTilesAndDirection(int length){
 		for(int i = 0; i<length; i++){
-			if(id==1){
-				//TODO: this is not cool
-				Coordinate coordinate = new Coordinate(i+5,4);
-				coordinates.add(coordinate);
-			} else {
-				Coordinate coordinate = new Coordinate(i+8,9);
-				coordinates.add(coordinate);
+			if(this.startingPosition == 1) {
+				Coordinate coordinate = new Coordinate(i+POS1.getX(),POS1.getY());
+				this.coordinates.add(coordinate);
+			} else if(this.startingPosition == 2) {
+				Coordinate coordinate = new Coordinate(POS2.getX()-i,POS2.getY());
+				this.coordinates.add(coordinate);
+			} else if(this.startingPosition == 3) {
+				Coordinate coordinate = new Coordinate(POS3.getX()-i,POS3.getY());
+				this.coordinates.add(coordinate);
+			} else if(this.startingPosition == 4) {
+				Coordinate coordinate = new Coordinate(POS4.getX()+i,POS4.getY());
+				this.coordinates.add(coordinate);
 			}
+			if(this.startingPosition == 1 || this.startingPosition == 4) this.moves.add("right");
+			else this.moves.add("left");
 		}
 	}
-
 	public boolean isReady() {
 		return isReady;
 	}
@@ -119,30 +104,12 @@ public class Player {
 	public void setName(String name) {
 		this.name = name;
 	}
-/*
-	public String getDirection() {
-		return direction;
+
+	public int getStartingPosition() {
+		return startingPosition;
 	}
 
-	public void setDirection(String direction) {
-		this.direction = direction;
+	public void setStartingPosition(int startingPosition) {
+		this.startingPosition = startingPosition;
 	}
-	
-	public String getNextDirection() {
-		return nextDirection;
-	}
-
-	public void setNextDirection(String nextDirection) {
-		this.nextDirection = nextDirection;
-	}
-
-	
-	public boolean isChangedPlayer() {
-		return changedPlayer;
-	}
-
-	public void setChangedPlayer(boolean changedPlayer) {
-		this.changedPlayer = changedPlayer;
-	}
-*/
 }

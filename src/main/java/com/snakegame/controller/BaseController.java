@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 //import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -43,7 +42,6 @@ public class BaseController {
 	@RequestMapping(value="/playerjson", method=RequestMethod.POST)
 	public @ResponseBody List<Player> addPlayer(ModelMap model, @RequestBody Player player){ //, HttpServletResponse rRes, HttpServletRequest rReq
 		List<Player> lp = new ArrayList<Player>();
-		Player p = new Player();
 		String playerName = "";
 		if(!player1Ready) {
 			player1Name = player.getName(); //readNames(rReq);

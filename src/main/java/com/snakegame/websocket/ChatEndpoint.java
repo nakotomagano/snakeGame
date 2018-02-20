@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -55,15 +54,15 @@ public class ChatEndpoint {
 		users.put(session.getId(), username);
 
 		if(chatEndpoints.size() == 1) {
-			Player player1 = new Player(chatEndpoints.size(),username);
+			Player player1 = new Player(chatEndpoints.size(),username,1);
 			match.setPlayer1(player1);
 			match.getPlayer1().setReady(true);
-			Player player2 = new Player(2,"waiting");
+			Player player2 = new Player(2,"waiting",3);
 			match.setPlayer2(player2);
 			Food f = new Food(START_FOOD_POSITION, "starting");
 			match.setFood(f);
 		} else if (chatEndpoints.size() == 2){
-			Player player2 = new Player(chatEndpoints.size(),username);
+			Player player2 = new Player(chatEndpoints.size(),username,3);
 			match.setPlayer2(player2);
 			match.getPlayer2().setReady(true);
 		}
@@ -162,9 +161,18 @@ public class ChatEndpoint {
 		}
 	}
 	private void respawn(Player player) {
+		if(player.getId() == 1) {
+			Player player2 = match.getPlayer2();
+			int randomQuater = ThreadLocalRandom.current().nextInt(1, 5);
+			while(randomQuater==player2.getStartingPosition()) randomQuater = ThreadLocalRandom.current().nextInt(1, 5);
+			player.setStartingPosition(randomQuater);
+		} else if(player.getId() == 2) {
+			Player player1 = match.getPlayer1();
+			int randomQuater = ThreadLocalRandom.current().nextInt(1, 5);
+			while(randomQuater==player1.getStartingPosition()) randomQuater = ThreadLocalRandom.current().nextInt(1, 5);	
+			player.setStartingPosition(randomQuater);		
+		}
 		player.createBody(player.getCoordinates().size()-1);
-		player.getMoves().clear();
-		player.getMoves().add("right");
 	}
 
 	//Part of calculateNextPositions()

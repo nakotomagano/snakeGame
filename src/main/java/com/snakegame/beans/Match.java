@@ -1,5 +1,7 @@
 package com.snakegame.beans;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.google.gson.annotations.Expose;
 
 public class Match {
@@ -96,6 +98,12 @@ public class Match {
 	}
 	
 	public void restart() {
+		int randomQuater1 = ThreadLocalRandom.current().nextInt(1, 5);
+		int randomQuater2 = ThreadLocalRandom.current().nextInt(1, 5);
+		while(randomQuater1==randomQuater2) randomQuater2 = ThreadLocalRandom.current().nextInt(1, 5);
+		
+		this.getPlayer1().setStartingPosition(randomQuater1);
+		this.getPlayer2().setStartingPosition(randomQuater2);
 		this.getPlayer1().restart();
 		this.getPlayer2().restart();
 		this.setMatchFinished(false);
