@@ -1,11 +1,11 @@
-
+var game_mode = 0;
 var ws;
 var msgsRecieved = 0;
 var message;
 var changed_direction;
 function connect() {
 	var username = document.getElementById("PlayerOneName").value;
-	var count = 3;
+	var count = 3; //timer: this many seconds before game starts
 	var host = document.location.host;
 	var pathname = document.location.pathname;
 	var thisPlayer;
@@ -13,7 +13,7 @@ function connect() {
 	var p1wins = 0;
 	var p2wins = 0;
 	var draws = 0;
-	ws = new WebSocket("ws://" +host  + pathname + "user/" + username);
+	ws = new WebSocket("ws://" +host  + pathname + "user/" + username+ "/mode/" + game_mode); // 
 
 	//kad primis poruku sa severa, radi sledece:	
 	ws.onmessage = function(event) {
@@ -27,7 +27,8 @@ function connect() {
 		var coordinates2 = message.player2.coordinates;
 		var food = message.food;
 		if (thisPlayer == null){
-			if(isPlayer1Ready && !isPlayer2Ready) thisPlayer = "player1";
+			if (game_mode === 1) thisPlayer = "player1"
+			else if(isPlayer1Ready && !isPlayer2Ready) thisPlayer = "player1";
 			else thisPlayer = "player2";
 		}
 		else player1 = true;
@@ -215,7 +216,8 @@ function connect() {
 		var msg = {
 				"from" : Playerfrom,
 				"to" : "server",
-				"content" : "rematch"
+				"content" : "rematch",
+				"mode" : game_mode 
 		}
 		var json = JSON.stringify(msg);
 		ws.send(json);
@@ -254,18 +256,13 @@ function connect() {
 			else if(key == "32") {
 				if(paused == false) pause_game();
 				else resume_game();
-			}
-			/*			var oldDir;
-			if (thisPlayer == "player1") oldDir = message.player1.moves[message.player1.moves.length-1];
-			if (thisPlayer == "player2") oldDir = message.player2.moves[message.player2.moves.length-1];
-			 */			var msg = {
+			}			var msg = {
 					 "from" : Playerfrom,
 					 "to" : "server",
-					 "content" : d, //oldDir
+					 "content" : d,
 					 "nextDirection" : next_d
 			 }
 			 var json = JSON.stringify(msg);
-			 //if (changed_direction)
 			 ws.send(json);
 			// console.log(msg);
 		} else {
@@ -291,15 +288,18 @@ function connect() {
 					"content" : d
 			}
 			var json = JSON.stringify(msg);
-			//if (changed_direction)
 			ws.send(json);
-			//if(next_d != undefined)
 			//console.log(msg);
 		}
 	});
 
 }
 $("#playerName").click(function(){
+	connect();
+	$("#insert_data").css('visibility','hidden');
+});
+$("#playVsBot").click(function(){
+	game_mode = 1; // 0 = play vs other player; 1 = play vs computer;
 	connect();
 	$("#insert_data").css('visibility','hidden');
 });

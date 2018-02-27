@@ -2,10 +2,13 @@ package com.snakegame.websocket;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,6 +23,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import javax.ws.rs.Path;
 
 import com.snakegame.beans.Coordinate;
 import com.snakegame.beans.Food;
@@ -28,48 +32,66 @@ import com.snakegame.beans.Message;
 import com.snakegame.beans.Player;
 
 
-@ServerEndpoint(value = "/user/{username}", decoders = { MatchDecoder.class, MessageDecoder.class}, encoders = {MatchEncoder.class, MessageEncoder.class})
+@ServerEndpoint(value = "/user/{username}/mode/{game_mode}", decoders = { MatchDecoder.class, MessageDecoder.class}, encoders = {MatchEncoder.class, MessageEncoder.class})
 public class ChatEndpoint {
 
 	private Session session;
 	private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
 	private static final int FIELD_WIDTH = 40;
 	private static final int FIELD_HEIGHT = 26;
-	private static HashMap<String, String> users = new HashMap<>();
 	private static Map<String, Session> sessions = new HashMap<String, Session>();
 	private static Match match = new Match();
 	private static ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(); //newScheduledThreadPool(0);	//newSingleThreadScheduledExecutor()
-	//ScheduledExecutorService timer = Executors.newScheduledThreadPool(5);
 	private final int MIN_SNAKE_SIZE = 4;
 	private final int GAME_SPEED = 300; //in milliseconds
 	private final int GAME_DELAY = 3000; //in milliseconds
 	private final Coordinate START_FOOD_POSITION = new Coordinate(-1,-1);
 
 	@OnOpen
-	public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
+	//@Path("{username}/{game_mode}")
+	public void onOpen(Session session,
+			@PathParam("username") String username,
+			@PathParam("game_mode") String game_mode
+			) throws IOException, EncodeException {
 
 		this.session = session;
 		chatEndpoints.add(this);
 		sessions.put(session.getId(), session);
-		users.put(session.getId(), username);
+
+		match.setMode(game_mode);
 
 		if(chatEndpoints.size() == 1) {
 			Player player1 = new Player(chatEndpoints.size(),username,1);
 			match.setPlayer1(player1);
 			match.getPlayer1().setReady(true);
-			Player player2 = new Player(2,"waiting",3);
+			String p2Name;
+			if("0".equals(game_mode)) p2Name = "waiting";
+			else p2Name = "Computer";
+			Player player2 = new Player(2,p2Name,3);
 			match.setPlayer2(player2);
 			Food f = new Food(START_FOOD_POSITION, "starting");
 			match.setFood(f);
+
+			//play vs computer:
+			if("1".equals(game_mode)) {
+				match.getPlayer2().setReady(true);			
+			}
 		} else if (chatEndpoints.size() == 2){
 			Player player2 = new Player(chatEndpoints.size(),username,3);
 			match.setPlayer2(player2);
 			match.getPlayer2().setReady(true);
 		}
-		if (!match.getPlayer2().isReady()){
+		if ("0".equals(game_mode)) {
+			if (!match.getPlayer2().isReady()){
+				broadcast(match);
+			} else
+				startTheMatch();
+		}
+
+		if ("1".equals(game_mode)) {
 			broadcast(match);
-		} else
 			startTheMatch();
+		}
 	}
 
 	private void startTheMatch() {
@@ -106,6 +128,7 @@ public class ChatEndpoint {
 	}
 
 	private void calculateNextPositions() throws IOException, EncodeException {
+		//System.out.println("============================");
 		//	boolean changedPlayer1 = false;
 		Player player1 = match.getPlayer1();
 		Player player2 = match.getPlayer2();
@@ -122,19 +145,20 @@ public class ChatEndpoint {
 		Coordinate newHead1 = new Coordinate();
 		Coordinate newHead2 = new Coordinate();
 
-		/*
-		System.out.println("=====Podaci pre pomeranja:=====");
-		System.out.println("Koordinate: " + player2.getCoordinates().toString());
-		System.out.println("Previous direcion : " + player2.getPreviousDirection() + " Direction: " + player2.getDirection()+ " Next Direction: " + player2.getNextDirection());
-		 */
+		System.out.println("calculating Bot Direction...");
+		if ("1".equals(match.getMode()))
+			calculateBotDirection();
+		System.out.println("calculated Bot Direction");
+
+
 		movePlayer(player1, newHead1, head1, tail1);
+		System.out.println("movedPlayer1");
 		movePlayer(player2, newHead2, head2, tail2);
-		/*
-		System.out.println("Podaci posle pomeranja:");
-		System.out.println("Koordinate: " + player2.getCoordinates());
-		System.out.println("Previous direcion : " + player2.getPreviousDirection()+" Direction: " + player2.getDirection()+" Next Direction: " + player2.getNextDirection());
-		 */
+		System.out.println("movedPlayer2");
+
 		checkForCombat(newHead1, newHead2);
+		System.out.println("checkedForCombat");
+
 		//When someone hits the wall, remove one tile and respawn
 		if(playerHitTheWall(newHead1) || playerHitHimself(player1)){
 			respawn(player1);
@@ -142,6 +166,7 @@ public class ChatEndpoint {
 		if(playerHitTheWall(newHead2) || playerHitHimself(player2)){
 			respawn(player2);
 		}
+		System.out.println("playersHitTheWall");
 		if(player1.getCoordinates().size() < MIN_SNAKE_SIZE){
 			if(player2.getCoordinates().size() < MIN_SNAKE_SIZE){
 				match.setMatchFinished(true);
@@ -150,14 +175,18 @@ public class ChatEndpoint {
 				match.setMatchFinished(true);	//winner is player2!
 				match.setWinner(2);
 			}
+			System.out.println("p1 MIN_SNAKE_SIZE");
 		} else if(player2.getCoordinates().size() < MIN_SNAKE_SIZE){
 			match.setMatchFinished(true);
 			match.setWinner(1);					//winner is player1!
+			System.out.println("p2 MIN_SNAKE_SIZE");
 		}
 		if(!match.isGameOverSent())
 			broadcast(match);
+		System.out.println("broadcast match");
 		if(match.isMatchFinished()){
 			match.setGameOverSent(true);
+			System.out.println("gameover sent");
 		}
 	}
 	private void respawn(Player player) {
@@ -267,7 +296,7 @@ public class ChatEndpoint {
 				System.out.println("Player 2 wants a rematch!");
 			}
 		}
-		if (match.getPlayer1().isRematch() && match.getPlayer2().isRematch()){
+		if (match.getPlayer1().isRematch() && ( match.getPlayer2().isRematch() || "1".equals(msg.getMode()))){
 			//REMATCH!
 			System.out.println("Rematch starting!");
 			match.restart();
@@ -299,11 +328,80 @@ public class ChatEndpoint {
 		}
 	}
 
+	private void calculateBotDirection() {
+		// TODO This is just a primitive bot, make it better
+		//figure out other player direction and put it into account
+		//get food if you can
+		//try not to hit walls or
+		List<Coordinate> prey= new ArrayList<Coordinate>();
+		prey = match.getPlayer1().getCoordinates();
+		int player2headPos = match.getPlayer2().getCoordinates().size()-1;
+
+		Coordinate goal = new Coordinate();
+		//System.out.println("Getting closest coordinate...");
+		//System.out.println("player1headPos: " + player1headPos);
+		//System.out.println("player1coords: " + match.getPlayer1().getCoordinates());
+		goal = getClosestCoordinate(match.getPlayer2().getCoordinates().get(player2headPos), prey);
+		int distX = match.getPlayer2().getCoordinates().get(player2headPos).getX() - goal.getX();
+		int distY = match.getPlayer2().getCoordinates().get(player2headPos).getY() - goal.getY();
+
+		System.out.println("distX, distY...");
+		if(Math.abs(distX) > Math.abs(distY)) {
+			match.getPlayer2().getMoves().clear();
+			if(distX > 0) {
+				match.getPlayer2().getMoves().add("left");
+				/*System.out.println("Snake: " + match.getPlayer2().getCoordinates().get(player2headPos));
+				System.out.println("Goal: " + goal);
+				System.out.println("Go Left.");*/
+			}
+			else {
+				match.getPlayer2().getMoves().add("right");
+			}
+		} else if (Math.abs(distX) < Math.abs(distY)){
+			match.getPlayer2().getMoves().clear();
+			if(distY > 0)	{
+				match.getPlayer2().getMoves().add("up");
+			}
+			else {
+				match.getPlayer2().getMoves().add("down");
+			}
+		} else {
+			if(distX > 0) {
+				match.getPlayer2().getMoves().add("left");
+			}	else if(distX < 0){
+				match.getPlayer2().getMoves().add("right");
+			} else if(distY > 0)	{
+				match.getPlayer2().getMoves().add("up");
+			}
+			else {
+				match.getPlayer2().getMoves().add("down");
+			}
+
+		}
+	}
+
+	private Coordinate getClosestCoordinate(Coordinate teeth, List<Coordinate> prey) {
+		Coordinate result = new Coordinate(0,0);
+		int minDistance = FIELD_HEIGHT + FIELD_WIDTH;
+		for(Coordinate c : prey){
+			int distance = Math.abs(teeth.getX() - c.getX()) + Math.abs(teeth.getY() - c.getY());
+			if(distance < minDistance && distance > 0){
+				minDistance = distance;
+				result = c;
+			}
+		}
+			int toFood = Math.abs(teeth.getX() - match.getFood().getCoord().getX()) + Math.abs(teeth.getY() - match.getFood().getCoord().getY());
+		if(minDistance > toFood & match.getFood().getCoord().getX() > 0){
+			minDistance = toFood;
+			result = match.getFood().getCoord();
+		}
+		return result;
+	}
+
 	//Part of onMessage():
 	private void checkPlayerDirection(Player player, Message msg) {
 		String direction = msg.getContent();
 		String nextDirection = msg.getNextDirection();
-		//	System.out.println("checking player direction");
 		if(!direction.isEmpty()){
 
 			if(player.getMoves().size() <= 2) {
@@ -366,7 +464,6 @@ public class ChatEndpoint {
 		// Do error handling here
 	}
 
-	//private static void broadcast(final Player message) throws IOException, EncodeException {
 	private static void broadcast(final Match match) throws IOException, EncodeException {
 		chatEndpoints.forEach(endpoint -> {
 			synchronized (endpoint) {

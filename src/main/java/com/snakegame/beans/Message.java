@@ -14,6 +14,8 @@ public class Message {
 	private String nextDirection = "";
 	@Expose
 	private boolean changedDirection = false;
+	@Expose
+	private String mode;
 	
 	@Override
     public String toString() {
@@ -60,4 +62,11 @@ public class Message {
         this.content = content;
     }
 
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
 }

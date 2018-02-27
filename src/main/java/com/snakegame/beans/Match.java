@@ -22,6 +22,7 @@ public class Match {
 	@Expose
 	String status = "";
 	@Expose int winner = 0;
+	@Expose String mode;
 
 	public Match(){
 		
@@ -97,6 +98,14 @@ public class Match {
 		this.winner = winner;
 	}
 	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
 	public void restart() {
 		int randomQuater1 = ThreadLocalRandom.current().nextInt(1, 5);
 		int randomQuater2 = ThreadLocalRandom.current().nextInt(1, 5);

@@ -38,6 +38,7 @@
 				Enter your name: <input type="text" id="PlayerOneName"
 					name="PlayerOneName">
 				<button id="playerName">Ready</button>
+				<button id="playVsBot">Play vs Computer</button>
 			</div>
 			<div id="div1" class="test" class="divPlayer">
 				Player 1: <label id="lblPlayerOneName"> </label>
